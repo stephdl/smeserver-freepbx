@@ -224,7 +224,11 @@ echo "Download and install FreePBX (The hugely hacky way for the time being)"
 FREEPBX_VERSION="2.11.0.38"
 mkdir -p /usr/share/freepbx/sources
 rm -f /usr/share/freepbx/sources/freepbx-$FREEPBX_VERSION.tgz
-
+#
+# FreePBX stable version 2.11.x for use with Asterisk 1.8. FPBX version 2.12.x is a different beast, don't even try it!
+wget -P /usr/share/freepbx/sources http://mirror.freepbx.org/freepbx-$FREEPBX_VERSION.tgz
+tar zxvf /usr/share/freepbx/sources/freepbx-$FREEPBX_VERSION.tgz -C /usr/share/freepbx/sources
+#
 # Change FreePBX database settings that should have come from /etc/amportal.conf, but that needs a new e-smith template for FreePBX > 1.9
 FPBX_SETTING_PATH="/var/lib/asterisk/bin/freepbx_setting"
 $FPBX_SETTING_PATH DISABLE_CSS_AUTOGEN 1
