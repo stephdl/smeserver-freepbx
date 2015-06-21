@@ -4,7 +4,7 @@
 
 #%define fpbxversion 2.5.0
 %define version	0.1
-%define release 33
+%define release 34
 %define name smeserver-freepbx
 
 Summary: Asterisk web GUI
@@ -33,7 +33,7 @@ Requires: sox
 Requires: mod_auth_tkt
 Requires: e-smith-base
 Requires: freepbx-src
-
+Requires: iksemel speex spandsp asterisk asterisk-mysql asterisk-sounds-core-en-ulaw php-posix asterisk-calendar asterisk-fax asterisk-jabber asterisk-ldap asterisk-snmp asterisk-voicemail
 #Buildarch: noarch
 AutoReqProv: no
 
@@ -44,6 +44,9 @@ This package provide the integration of FreePBX on SME Server.
 
 
 %changelogi
+* Sun Jun 21 2015 stephane de labrusse <stephdl@de-labrusse.fr> 0.1-34.sme
+- first release to sme9
+- script and credits to Hsing-Foo Wang hsingfoo@gmail.com
 
 * Sun May 12 2013 JP Pialasse <tests@pialasse.com> 0.1-33.sme
 - buildarch removed in order to find the correct %{_libdir}/asterisk/modules/app_addon_sql_mysql.so 
@@ -205,6 +208,61 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %post
+	echo "Get the additional sound files, unpack and symlink to /var/lib/asterisk/sounds/en. Then remove the tgz archive"
+	wget -P /usr/share/asterisk/sounds http://downloads.asterisk.org/pub/telephony/sounds/asterisk-extra-sounds-en-ulaw-current.tar.gz
+	tar zxvf /usr/share/asterisk/sounds/asterisk-extra-sounds-en-ulaw-current.tar.gz -C /usr/share/asterisk/sounds
+	rm -f /usr/share/asterisk/sounds/asterisk-extra-sounds-en-ulaw-current.tar.gz
+	#
+	# create a symbolic link to the sounds directory, still need to find out why /etc/asterisk/asterisk.conf astdatadir is not working
+	# changed the template so astdatadir is now set to /usr.share/asterisk. What's the difference if any?
+	ln -sfn /usr/share/asterisk/sounds/ /var/lib/asterisk/sounds/en
+#
+# Done with the easy bit...
+#
+echo "Download and install FreePBX (The hugely hacky way for the time being)"
+#Create the install directory, and make sure there is no old version for the script will stop
+FREEPBX_VERSION="2.11.0.38"
+mkdir -p /usr/share/freepbx/sources
+rm -f /usr/share/freepbx/sources/freepbx-$FREEPBX_VERSION.tgz
+
+# Change FreePBX database settings that should have come from /etc/amportal.conf, but that needs a new e-smith template for FreePBX > 1.9
+FPBX_SETTING_PATH="/var/lib/asterisk/bin/freepbx_setting"
+$FPBX_SETTING_PATH DISABLE_CSS_AUTOGEN 1
+$FPBX_SETTING_PATH CHECKREFERER 0
+$FPBX_SETTING_PATH AUTHTYPE none
+$FPBX_SETTING_PATH AMPEXTENSIONS deviceanduser
+$FPBX_SETTING_PATH AMPWEBROOT /opt/freepbx
+$FPBX_SETTING_PATH MODULEADMINWGET 1
+$FPBX_SETTING_PATH DYNAMICHINTS 1
+$FPBX_SETTING_PATH ARI_ADMIN_PASSWORD $(/sbin/e-smith/db configuration getprop freepbx AriPassword)
+$FPBX_SETTING_PATH AMPMGRPASS $(/sbin/e-smith/db configuration getprop freepbx ManagerPassword)
+#
+#remove the default asterisk config files and replace them with symbolic links to FreePBX's own config files
+CONF_FILES=(features.conf iax.conf logger.conf sip.conf sip_notify.conf ccss.conf extensions.conf confbridge.conf)
+for symlink in "${CONF_FILES[@]}"
+do
+	rm -f /etc/asterisk/$symlink
+	ln -s /opt/freepbx/admin/modules/core/etc/$symlink /etc/asterisk/$symlink 
+done
+ln -sfn /opt/freepbx/admin/modules/cdr/etc/cel.conf /etc/asterisk/cel.conf
+ln -sfn /opt/freepbx/admin/modules/cdr/etc/cel_odbc.conf /etc/asterisk/cel_odbc.conf
+touch /etc/asterisk/cel_general_additional.conf
+touch /etc/asterisk/cel_general_custom.conf
+touch /etc/asterisk/cel_custom_post.conf
+#
+echo "Download and install most of the FreePBX modules."
+# -f forces modules to install ignoring dependencies. There are dependencies, but all are satisfied with this list."
+ALL_MODULES=(recordings framework findmefollow directory donotdisturb parking queues ringgroups setcid timeconditions vmblast printextensions weakpasswords fax iaxsettings outroutemsg pinsets manager customappsreg userman daynight pbdirectory phonebook dictate disa miscapps miscdests phpinfo queueprio speeddial contactdir customcontexts extensionsettings languages paging restart ivr backup accountcodepreserve presencestate announcement bulkdids bulkextensions callback callforward callwaiting conferences asteriskinfo campon hotelwakeup asterisk-cli blacklist cidlookup endpointman)
+for fpbx_module in "${ALL_MODULES[@]}"
+do
+	sudo -u asterisk /var/lib/asterisk/bin/module_admin -f --repos standard,extended,unsupported upgrade $fpbx_module
+done
+sudo -u asterisk /var/lib/asterisk/bin/retrieve_conf
+sudo -u asterisk /var/lib/asterisk/bin/module_admin reload
+#Fix chattr issue
+# /var/lib/asterisk/bin/freepbx_engine line 296 (about). change from chattr -i $AMPWEBROOT/*  2>&1 >/dev/null to chattr -i $AMPWEBROOT/* 2>/dev/null   !!!!Not working from the script but does work from the command line. WHY??
+sed -i 's/2>&1/2/g' /var/lib/asterisk/bin/freepbx_engine
+
 
 %preun
 if [ $1 = 0 ] ; then

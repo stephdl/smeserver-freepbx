@@ -3,7 +3,7 @@ astetcdir => /etc/asterisk
 astmoddir => { return '/usr/lib64/asterisk/modules' if -d '/usr/lib64/asterisk/modules';
                return '/usr/lib/asterisk/modules' if -d '/usr/lib/asterisk/modules'; }
 astvarlibdir => /var/lib/asterisk
-astdatadir => /var/lib/asterisk
+astdatadir => /usr/share/asterisk
 astagidir => /var/lib/asterisk/agi-bin
 astspooldir => /var/spool/asterisk
 astrundir => /var/run/asterisk

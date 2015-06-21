@@ -1,4 +1,4 @@
-/var/log/asterisk/messages /var/log/asterisk/event_log /var/log/asterisk/queue_log /var/log/asterisk/full /var/log/asterisk/warnings /var/log/asterisk/misdn.log \{
+/var/log/asterisk/messages /var/log/asterisk/freepbx* /var/log/asterisk/event_log /var/log/asterisk/queue_log /var/log/asterisk/full /var/log/asterisk/warnings /var/log/asterisk/misdn.log \{
     missingok
     notifempty
     compress

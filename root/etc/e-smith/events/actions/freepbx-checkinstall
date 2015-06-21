@@ -41,7 +41,7 @@ if [ ! -d /opt/freepbx/admin ]; then
         ./start_asterisk start >> /root/freepbx_install.log 2>&1
 	echo "" >> /root/freepbx_install.log
 	echo "Installing FreePBX..." >> /root/freepbx_install.log
-	echo "a" | ./install_amp >> /root/freepbx_install.log 2>&1
+echo "a" | ./install_amp --webroot /opt/freepbx --dbname freepbxdb --debug >> /root/freepbx_install.log 2>&1
 	else
 		echo "error: /usr/share/freepbx/sources/freepbx/ dosen't exists"
 		exit 1
