@@ -22,7 +22,7 @@ service_link_enhanced("dahdi", "K16", "1");
 safe_symlink("../daemontools" , 'root/etc/rc.d/init.d/supervise/httpd-fpbx');
 safe_symlink("/var/service/httpd-fpbx" , 'root/service/httpd-fpbx');
 #added by stephdl
-safe_symlink("../daemontools" , '/etc/rc.d/init.d/httpd-fpbx');
+safe_symlink("../daemontools" , 'root/etc/rc.d/init.d/httpd-fpbx');
 
 # Panel links
 
