@@ -1,0 +1,28 @@
+{
+
+use esmith::AccountsDB;
+
+sub getUsersList ($){
+	my ($panelName) = @_;
+	my $a = esmith::AccountsDB->open_ro || die "Error opening accounts db";
+	my @users = $a->users();
+	my @groups = $a->groups();
+	my @fpbxUsers = ();
+	foreach my $user (@users){
+        	my $panels = $user->prop('AdminPanels') || '';
+	        push(@fpbxUsers,$user->key) if ($panels =~ /^(.*,)?$panelName(,.*)?$/);
+	}
+	foreach my $group (@groups){
+        	$panels = $group->prop('AdminPanels') || '';
+        		if ($panels =~ /^(.*,)?$panelName(,.*)?$/){
+                	my @members = split(/,/,($group->prop('Members') || ''));
+                	push(@fpbxUsers,@members);
+        	}
+	}
+
+	my %seen = ();
+	my $u = join (' ', grep { ! $seen{ $_ }++ } @fpbxUsers);
+	return $u;
+}
+}
+

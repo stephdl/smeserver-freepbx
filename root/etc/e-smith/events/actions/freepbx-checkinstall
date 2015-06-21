@@ -1,0 +1,64 @@
+#!/bin/bash
+
+DBNAME=$(/sbin/e-smith/db configuration getprop freepbx DbName)
+DBUSER=$(/sbin/e-smith/db configuration getprop freepbx DbUser)
+DBPASS=$(/sbin/e-smith/db configuration getprop freepbx DbPassword)
+CDRDBNAME=$(/sbin/e-smith/db configuration getprop freepbx CdrDbName)
+
+
+if [ $(mysqlshow | grep -c $DBNAME) -lt 1 ]; then
+        mysql -e "create database $DBNAME;"
+        mysql -e "grant all privileges on $DBNAME.* to '$DBUSER'@'localhost' identified by '$DBPASS';"
+        mysql -e 'flush privileges;'
+
+        if [ -e /usr/share/freepbx/sources/freepbx/SQL/newinstall.sql ]; then
+                mysql $DBNAME < /usr/share/freepbx/sources/freepbx/SQL/newinstall.sql
+        else
+                echo "Error: file /usr/share/freepbx/sources/freepbx/SQL/newinstall.sql dosen't exists"
+                exit 1
+        fi
+fi
+
+if [ $(mysqlshow | grep -c $CDRDBNAME) -lt 1 ]; then
+        mysql -e "create database $CDRDBNAME;"
+        mysql -e "grant all privileges on $CDRDBNAME.* to '$DBUSER'@'localhost' identified by '$DBPASS';"
+        mysql -e 'flush privileges;'
+        if [ -e /usr/share/freepbx/sources/freepbx/SQL/cdr_mysql_table.sql ]; then
+                mysql $CDRDBNAME < /usr/share/freepbx/sources/freepbx/SQL/cdr_mysql_table.sql
+        else
+                echo "Error: file /usr/share/freepbx/sources/freepbx/SQL/cdr_mysql_table.sql dosen't exists"
+                exit 1
+        fi
+fi
+
+# Run the install script only if it's a new install
+# Upgrades have to be done through freePBX and the online repository
+if [ ! -d /opt/freepbx/admin ]; then
+    mkdir -p /opt/freepbx
+    if [ -e /usr/share/freepbx/sources/freepbx/ ]; then
+        cd /usr/share/freepbx/sources/freepbx/
+	echo "Starting Asterisk..." > /root/freepbx_install.log
+        ./start_asterisk start >> /root/freepbx_install.log 2>&1
+	echo "" >> /root/freepbx_install.log
+	echo "Installing FreePBX..." >> /root/freepbx_install.log
+	echo "a" | ./install_amp >> /root/freepbx_install.log 2>&1
+	else
+		echo "error: /usr/share/freepbx/sources/freepbx/ dosen't exists"
+		exit 1
+	fi
+else
+    if [ -x /var/lib/asterisk/bin/freepbx_engine ]; then
+	/var/lib/asterisk/bin/freepbx_engine chown > /dev/null 2>&1
+    else
+	echo "error: /var/lib/asterisk/bin/freepbx_engine is not executable"
+        exit 1
+    fi
+    if [ -x /var/lib/asterisk/bin/retrieve_conf ]; then
+        /var/lib/asterisk/bin/retrieve_conf > /dev/null 2>&1
+    else
+        echo "error: /var/lib/asterisk/bin/freepbx_engine is not executable"
+        exit 1
+    fi
+fi
+
+exit 0 

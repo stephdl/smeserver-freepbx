@@ -1,0 +1,9 @@
+# AMPDISABLELOG=true|false # DEFAULT VALUE true
+# Whether or not to invoke the freepbx log facility
+
+# AMPSYSLOGLEVEL=LOG_EMERG|LOG_ALERT|LOG_CRIT|LOG_ERR|LOG_WARNING|LOG_NOTICE|LOG_INFO|LOG_DEBUG|LOG_SQL|SQL # DEFAULT VALUE LOG_ERR
+# Where to log if enabled, SQL, LOG_SQL logs to old MySQL table, others are passed to syslog system to determine where to log
+
+# AMPENABLEDEVELDEBUG=true|false # DEFAULT VALUE false
+# Whether or not to include log messages marked as 'devel-debug' in the log system
+

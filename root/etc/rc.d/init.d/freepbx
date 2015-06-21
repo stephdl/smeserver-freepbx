@@ -1,0 +1,85 @@
+#! /bin/sh
+# chkconfig: 98 10
+
+if [ -f /etc/init.d/functions ] ; then 
+	. /etc/init.d/functions
+elif [ -f /etc/rc.d/init.d/functions ] ; then
+	. /etc/rc.d/init.d/functions
+else
+	exit 0
+fi   
+
+
+
+
+# make sure config file exists
+if [ ! -e "/etc/amportal.conf" ];  then
+    echo ""
+    echo "/etc/amportal.conf does not exist!"
+    echo "Have you installed the AMP configuration?"
+    exit 1
+fi
+. /etc/amportal.conf
+
+if [ -x ${AMPBIN}/freepbx_engine ]; then
+        FPBXENGINE=${AMPBIN}/freepbx_engine
+elif [ -x ${ASTVARLIBDIR}/bin/freepbx_engine ]; then
+        FPBXENGINE=${ASTVARLIBDIR}/bin/freepbx_engine
+elif [ -x /var/lib/asterisk/bin/freepbx_engine ]; then
+        FPBXENGINE=/var/lib/asterisk/bin/freepbx_engine
+else
+        echo "FATAL: can not find freepbx_engine to start Asterisk"
+	exit 1
+fi
+
+FPBXSTATUS=$(/sbin/e-smith/db configuration getprop freepbx status)
+
+case "$1" in
+  start)
+        $FPBXENGINE start > /dev/null 2>&1
+	echo -n "Starting FreePBX: "
+	RETVAL=$?
+        ;;
+  stop)
+        $FPBXENGINE stop > /dev/null 2>&1
+	echo -n "Stoping FreePBX: "
+	RETVAL=$?
+        ;;
+  restart)
+        $FPBXENGINE restart > /dev/null 2>&1
+	echo -n "Restarting FreePBX: "
+	RETVAL=$?
+        ;;
+  reload)
+        /usr/sbin/asterisk -rx 'reload' > /dev/null 2>&1
+	echo -n "Reloading FreePBX: "
+	RETVAL=$?
+        ;;
+  kill)
+        $FPBXENGINE kill > /dev/null 2>&1
+	echo -n "Killing FreePBX: "
+	RETVAL=$?
+        ;;
+  adjust)
+	if [ $FPBXSTATUS == 'enabled' ]; then
+		$FPBXENGINE restart > /dev/null 2>&1
+	else
+		$FPBXENGINE stop > /dev/null 2>&1
+	fi
+	echo -n "Adjusting FreePBX: "
+	RETVAL=$?
+	;;
+  *)
+        echo "Usage: $0 {start|stop|restart|reload|adjust|kill}"
+        exit 1
+esac
+
+if [ $RETVAL -eq 0 ]; then
+	echo_success
+else
+	echo_failure
+fi
+echo
+
+exit $RETVAL
+

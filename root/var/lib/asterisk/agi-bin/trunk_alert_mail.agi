@@ -1,0 +1,44 @@
+#!/bin/bash
+
+declare -a array
+while read -e ARG && [ "$ARG" ] ; do
+array=(` echo $ARG | sed -e 's/://'`)
+export ${array[0]}=${array[1]}
+done
+
+TRUNK=$1
+DOMAIN=`dnsdomainname`
+HOST=`hostname`
+
+EMAIL=admin@$DOMAIN
+
+DATE=`date "+%d-%m-%Y %H:%M"`
+
+CID=`echo $agi_callerid`
+CIDNAME=`echo $agi_calleridname`
+EXTENSION=`echo $agi_extension`
+#CHANNEL=`echo $agi_channel`
+TYPE=`echo $agi_type`
+DNID=`echo $agi_dnid`
+
+REPORT=$EXTENSION
+
+if [ "$EXTENSION" = "s-CHANUNAVAIL" ]; then
+    REPORT="Channel Unavailable"
+elif [ "$EXTENSION" = "s-CONGESTION" ]; then
+    REPORT="Congestion"
+fi
+
+# Message Formating
+
+MSG="\n\n A call from \"$CIDNAME\" <$CID> (Type $TYPE)\n"
+MSG="$MSG To : $DNID\n"
+MSG="$MSG Using Trunk : $TRUNK\n"
+MSG="$MSG Has failed on host $HOST.$DOMAIN at $DATE\n\n"
+MSG="$MSG The error is : $REPORT \n\n"
+
+# Send an email
+
+echo -e "$MSG" | mail -s "[FAILED CALL] on host $HOST.$DOMAIN" "$EMAIL"
+
+

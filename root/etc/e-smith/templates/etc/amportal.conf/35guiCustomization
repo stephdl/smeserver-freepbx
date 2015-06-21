@@ -1,0 +1,20 @@
+
+# SERVERINTITLE if set to true, the browser title will be preceded with the server name. default false
+SERVERINTITLE=false
+
+# AMPADMINLOGO: Defines the logo that is to be displayed at the TOP RIGHT of the admin screen.
+#               This enables you to customize the look of the administration screen.
+# NOTE: images need to be saved in the ..../admin/images directory of your AMP install
+# This image should be 55px in height
+AMPADMINLOGO=logo.png
+
+# USECATEGORIES: Controls if the menu items in the admin interface are sorted by category (true),
+#                or sorted alphebetically with no categories shown (false). Defaults to true.
+#USECATEGORIES=false
+
+# AMPEXTENSIONS: the type of view for extensions admin 
+# If set to 'deviceanduser' Devices and Users will be administered seperately, and Users will be able to "login" to devices.
+# If set to 'extensions' Devices and Users will me administered in a single screen.
+AMPEXTENSIONS={((${'freepbx'}{'DeviceAndUser'} || 'disabled') eq 'enabled')? 'deviceanduser': 'extensions';}
+
+

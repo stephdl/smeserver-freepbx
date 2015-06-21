@@ -1,0 +1,10 @@
+
+<Directory /opt/freepbx/>
+        AddType application/x-httpd-php .php
+        AllowOverride None
+        order deny,allow
+        deny from all
+        allow from 127.0.0.1
+        php_admin_value session.save_path /var/lib/php/fpbx-session
+</Directory>
+

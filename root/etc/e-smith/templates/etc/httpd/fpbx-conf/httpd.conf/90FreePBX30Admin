@@ -1,0 +1,23 @@
+
+<Directory /opt/freepbx/admin/>
+        Options +followSymlinks
+        php_admin_flag allow_url_fopen On
+        php_admin_value memory_limit 100M
+        php_admin_value upload_max_filesize 100M
+        php_admin_value post_max_size 100M
+        php_admin_flag file_upload On
+        php_admin_flag magic_quotes_gpc Off
+</Directory>
+
+<Directory /opt/freepbx/admin/modules/>
+        deny from all
+</Directory>
+
+<Location /freepbx/admin>
+        AuthType Basic
+        TKTAuthLoginURL /server-common/cgi-bin/login
+        require user admin {getUsersList('freepbx');}
+        SetEnv IMGHDR_SRC "/server-common/server-manager.jpg"
+        Satisfy all
+</Location>
+

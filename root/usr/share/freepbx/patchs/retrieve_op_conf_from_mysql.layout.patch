@@ -1,0 +1,215 @@
+--- before/retrieve_op_conf_from_mysql.pl	2008-08-04 08:58:50.000000000 +0100
++++ after/retrieve_op_conf_from_mysql.pl	2008-08-01 10:04:51.000000000 +0100
+@@ -28,24 +28,38 @@ if (scalar @ARGV == 2)
+ 
+ ######## LAYOUT INFO #########
+ 
+-# This layout info should really be in a "panel" table in the freepbx database
++# NOTE - These values may be overwritten by values in a table in the freepbx database named "panel"
+ 
+-# structure is - Legend, startpos, stoppos, color1, color2
+-@rectangle1 = ("Trunks", 53, 80, "10ff10", "009900");
+-@rectangle2 = ("Extensions", 1, 40, "1010ff", "099cccc");
+-@rectangle3 = ("Parking lots", 49, 72, "ffff10", "cc9933");
+-@rectangle4 = ("Conferences", 45, 68, "006666", "a01000");
+-@rectangle5 = ("Queues", 41, 64, "ff1010", "a01000");
++# structure is - ID, Legend, startpos, stoppos, color1, color2
++@rectangle1 = ("trunk","Trunks", 53, 80, "10ff10", "009900");
++@rectangle2 = ("extension","Extensions", 1, 40, "1010ff", "99cccc");
++@rectangle3 = ("parking","Parking lots", 49, 72, "ffff10", "cc9933");
++@rectangle4 = ("conference","Conferences", 45, 68, "006666", "00a010");
++@rectangle5 = ("queue","Queues", 41, 64, "ff1010", "a01000");
+ @rectangles = (\@rectangle1,\@rectangle2,\@rectangle3,\@rectangle4,\@rectangle5);
+ 
++$rectmarginx = 1;
++$rectmarginy = 1;
++$legendoffsetx = 3;
++$legendoffsety = 1;	
++
++# $layoutbuttonsonly = 0 : allow display of buttons even if no corresponding layout info
++# $layoutbuttonsonly = 1 : suppress display of buttons if no corresponding layout info
++$layoutbuttonsonly = 1;
++
+ ######## BUTTON INFO #########
+ $buttonsizex = 246; # 1+244+1 from information in op_style.cfg
+ $buttonsizey = 28; # 1+26+1 from information in op_style.cfg
+ $numbuttonsx = 4;
+ $numbuttonsy = 20;
++$buttonsoriginx = -1;
++$buttonsoriginy = 32;
+ 
+ 
+ ######## STYLE INFO #########
++
++# NOTE - These values may be overwritten by the syleinfo function with values generated from the layout info
++
+ $extenpos="2-40";
+ #$trunkpos="52-60,71-80";
+ #$confepos="";
+@@ -59,13 +73,6 @@ $queuepos="42-44,61-64";
+ 
+ # End of changes
+ 
+-#automated generation of style-info
+-$extenpos=styleinfo("Extensions");
+-$trunkpos=styleinfo("Trunks");
+-$parkingpos=styleinfo("Parking lots");
+-$confepos=styleinfo("Conferences");
+-$queuepos=styleinfo("Queues");
+-
+ 
+ # Remove or add Zap trunks as needed
+ # Note: ZAP/* will match any ZAP channel that *is not referenced* in another button (ie: extensions)
+@@ -233,6 +240,34 @@ elsif ( $db_engine eq "sqlite3" ) {
+ 	$dbh = DBI->connect("dbi:SQLite:dbname=$db_file","","");
+ }
+ 
++# Get layout-info from a "panel" table in the freepbx database
++if (table_exists($dbh,"panel")) {
++	$statement = "SELECT id, legend, startpos, stoppos, color1, color2 from panel";
++	$result = $dbh->selectall_arrayref($statement);
++	@resultSet = @{$result};
++	if ( $#resultSet == -1 ) {
++		print "Notice: no panel defined\n";
++	}
++	push(@panellist, @{ $result });
++	@rectangles = @panellist;
++}
++
++# Automated generation of style-info from layout-info
++$autoextenpos=styleinfo("extension");
++$autotrunkpos=styleinfo("trunk");
++$autoparkingpos=styleinfo("parking");
++$autoconfepos=styleinfo("conference");
++$autoqueuepos=styleinfo("queue");
++
++if ($layoutbuttonsonly == 1) {$extenpos = $trunkpos = $parkingpos = $confepos = $queuepos = ""}
++
++if (defined($autoextenpos)) {$extenpos = $autoextenpos;}
++if (defined($autotrunkpos)) {$trunkpos = $autotrunkpos;}
++if (defined($autoparkingpos)) {$parkingpos = $autoparkingpos;}
++if (defined($autoconfepos)) {$confepos = $autoconfepos;}
++if (defined($autoqueuepos)) {$queuepos = $autoqueuepos;}
++
++
+ open( EXTEN, ">$op_conf" ) or die "Cannot create/overwrite config file: $op_conf ($!)\n";
+ print EXTEN $warning_banner;
+ 
+@@ -537,35 +572,42 @@ foreach my $pcontext ( @ampusers ) {
+ 
+ 	foreach my $rect ( @rectangles ) {
+ 		my $comment = @{$rect}[0];
+-		my $color1 = @{$rect}[3];
+-		my $color2 = @{$rect}[4];
+-		my $start = @{$rect}[1];
+-		my $stop = @{$rect}[2];
++		my $color1 = @{$rect}[4];
++		my $color2 = @{$rect}[5];
++		my $start = @{$rect}[2];
++		my $stop = @{$rect}[3];
+ 		
+-		my $xposition = $buttonsizex * int(($start-1)/$numbuttonsy);
+-		my $yposition = $buttonsizey * (($start-1)%$numbuttonsy);
++		my $xposition = $buttonsoriginx + $buttonsizex * int(($start-1)/$numbuttonsy);
++		my $yposition = $buttonsoriginy + $buttonsizey * (($start-1)%$numbuttonsy);
+ 		my $xsize = $buttonsizex * (1 + int(($stop-1)/$numbuttonsy) - int(($start-1)/$numbuttonsy));
+ 		my $ysize = $buttonsizey * (1 + (($stop-1)%$numbuttonsy) - (($start-1)%$numbuttonsy));
++
++		if (($xsize <= 0) || ($ysize <= 0)) {next;}
+ 		
+-		$xsize -= 2;
+-		$ysize -= 2;
++		$xposition += $rectmarginx;
++		$yposition += $rectmarginy;
++		$xsize -= 2 * $rectmarginx;
++		$ysize -= 2 * $rectmarginy;
+ 		
+-		$yposition += 32;
+-	
+ 		print EXTEN "\n; $comment\n[rectangle]\nx=$xposition\ny=$yposition\nwidth=$xsize\nheight=$ysize\nline_width=0\nline_color=$color1\nfade_color1=$color1\nfade_color2=$color2\nrnd_border=2\nalpha=20\nlayer=bottom\n";
+ 	}
+ 
+ 	### Write legends
+ 
+ 	foreach my $legend ( @rectangles ) {
+-		my $text = @{$legend}[0];
+-		my $start = @{$legend}[1];
++		my $text = @{$legend}[1];
++		my $start = @{$legend}[2];
++		my $stop = @{$legend}[3];
+ 		
+-		my $xposition = $buttonsizex * int(($start-1)/$numbuttonsy);
+-		my $yposition = $buttonsizey * (($start-1)%$numbuttonsy);
++		my $xposition = $buttonsoriginx + $buttonsizex * int(($start-1)/$numbuttonsy);
++		my $yposition = $buttonsoriginy + $buttonsizey * (($start-1)%$numbuttonsy);
++		my $xsize = $buttonsizex * (1 + int(($stop-1)/$numbuttonsy) - int(($start-1)/$numbuttonsy));
++		my $ysize = $buttonsizey * (1 + (($stop-1)%$numbuttonsy) - (($start-1)%$numbuttonsy));
++
++		if (($xsize <= 0) || ($ysize <= 0)) {next;}
+ 
+-		$xposition += 3;
+-		$yposition += 32;
++		$xposition += $legendoffsetx;
++		$yposition += $legendoffsety;
+ 	
+ 		print EXTEN "\n[LEGEND]\nx=$xposition\ny=$yposition\ntext=$text\nfont_size=18\nfont_family=Arial\nuse_embed_fonts=1\n";
+ 	}
+@@ -581,7 +623,7 @@ sub get_next_btn {
+ 	foreach $range (@rangelist) {
+ 		@rangeval=split("-",$range);
+ 		return $rangeval[0] if $last < $rangeval[0];
+-		return $last+1 if $last < $rangeval[1];
++		return $last+1 if defined($rangeval[1]) && ($last < $rangeval[1]);
+ 		#Need to try another range def...
+ 	}
+ 	#If we get here, we ran out of positions :(
+@@ -625,36 +667,39 @@ sub by_lastname {
+ 
+ 
+ sub styleinfo {
+-	my $legend = shift;
++	my $id = shift;
++	my $retval;
+ 	foreach my $rect ( @rectangles ) {
+-		if ($legend  eq @{$rect}[0]) {
++		if ($id  eq @{$rect}[0]) {
+ 
+-			my $start = @{$rect}[1];
+-			my $stop = @{$rect}[2];
++			my $start = @{$rect}[2];
++			my $stop = @{$rect}[3];
+ 			
+ 			my $xposition = int(($start-1)/$numbuttonsy);
+ 			my $yposition = (($start-1)%$numbuttonsy);
+-			my $xsize = int(($stop-1)/$numbuttonsy) - int(($start-1)/$numbuttonsy);
+-			my $ysize = (($stop-1)%$numbuttonsy) - (($start-1)%$numbuttonsy);
++			my $xsize = 1 + int(($stop-1)/$numbuttonsy) - int(($start-1)/$numbuttonsy);
++			my $ysize = 1 + (($stop-1)%$numbuttonsy) - (($start-1)%$numbuttonsy);
+ 	
++			if (($xsize <= 0) || ($ysize <= 0)) {print "Warning: rectange '$id' has negative area\n"; last;}
+ 			$styleinfo = "";
+ 			if ($ysize > 2) {
+-				$styleinfo .= ($start + 1) . "-" . ($start + $ysize) . ",";
++				$styleinfo .= ($start + 1) . "-" . ($start + $ysize - 1) . ",";
+ 			} 
+ 			elsif ($ysize == 2) {
+ 				$styleinfo .= ($start + 1) . ",";
+ 			}
+ 			
+-			for (my $i = 1 ; $i <= $xsize ; $i++ ) {
++			for (my $i = 1 ; $i < $xsize ; $i++ ) {
+ 				if ($ysize > 1) {
+-					$styleinfo .= (($i + $xposition) * $numbuttonsy + $yposition + 1) . "-" . (($i + $xposition) * $numbuttonsy + $yposition + $ysize + 1) . ",";
++					$styleinfo .= (($i + $xposition) * $numbuttonsy + $yposition + 1) . "-" . (($i + $xposition) * $numbuttonsy + $yposition + $ysize) . ",";
+ 				} 
+ 				else {
+ 					$styleinfo .= (($i + $xposition) * $numbuttonsy + $yposition + 1) . ",";		
+ 				}	
+ 			}
++			$retval = $styleinfo;
+ 			last;
+ 		}
+ 	}
+-	return $styleinfo;
++	return $retval;
+ }

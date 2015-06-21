@@ -1,0 +1,10 @@
+# These can be used to change the refresh rate of the System Status Panel. Most of
+# the stats are updated based on the STATS interval but a few items are checked
+# less frequently (such as Astersisk Uptime) based on the INFO value
+
+# DEFAULT VALUE: 6
+DASHBOARD_STATS_UPDATE_TIME=20
+
+# DEFAULT VALUE: 20
+DASHBOARD_INFO_UPDATE_TIME=60
+

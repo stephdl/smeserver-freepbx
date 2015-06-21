@@ -1,0 +1,83 @@
+{
+
+my $dbname = $freepbx{'DbName'} || 'freepbxdb';
+my $cdrdbname = $freepbx{'CdrDbName'} || 'asteriskcdrdb';
+my $dbuser = $freepbx{'DbUser'} || 'freepbxuser';
+my $dbpass = $freepbx{'DbPassword'} || 'secret';
+my $cdrdbpass = $freepbx{'CdrDbPassword'} || 'secret';
+
+$OUT .= << "HERE";
+#! /bin/sh
+
+if [ ! -d /var/lib/mysql/$dbname ]; then
+    mysqladmin create $dbname
+
+    if [ -e /usr/lib/freepbx/SQL/newinstall.sql ]; then
+        mysql $dbname < /usr/lib/freepbx/SQL/newinstall.sql
+    else
+        echo "Error: file /usr/lib/freepbx/SQL/newinstall.sql dosen't exists"
+        exit 1
+    fi
+fi
+
+if [ ! -d /var/lib/mysql/$cdrdbname ]; then
+    mysqladmin create $cdrdbname
+    if [ -e /usr/lib/freepbx/SQL/cdr_mysql_table.sql ]; then
+        mysql $cdrdbname < /usr/lib/freepbx/SQL/cdr_mysql_table.sql
+    else
+        echo "Error: file /usr/lib/freepbx/SQL/cdr_mysql_table.sql dosen't exists"
+        exit 1
+    fi
+fi
+
+/usr/bin/mysql <<EOF
+USE mysql;
+
+REPLACE INTO user (  
+                     host,
+                     user,
+                     password)
+            VALUES ( 
+                     'localhost',
+                     '$dbuser',
+                     PASSWORD ('$dbpass'));
+
+
+REPLACE INTO db (  
+                   host,
+                   db,
+                   user,
+                   select_priv, insert_priv, update_priv, delete_priv,
+                   create_priv, alter_priv, index_priv, drop_priv, create_tmp_table_priv,
+                   grant_priv, lock_tables_priv, references_priv)
+          VALUES ( 
+                   'localhost',
+                   '$dbname',
+                   '$dbuser',
+                   'Y', 'Y', 'Y', 'Y',
+                   'Y', 'Y', 'Y', 'Y', 'Y',
+                   'N', 'Y', 'Y');
+REPLACE INTO db (  
+                   host,
+                   db,
+                   user,
+                   select_priv, insert_priv, update_priv, delete_priv,
+                   create_priv, alter_priv, index_priv, drop_priv, create_tmp_table_priv,
+                   grant_priv, lock_tables_priv, references_priv)
+          VALUES (
+                   'localhost',
+                   '$cdrdbname',
+                   '$dbuser',
+                   'Y', 'Y', 'Y', 'Y',
+                   'Y', 'Y', 'Y', 'Y', 'Y',
+                   'N', 'Y', 'Y');
+
+
+FLUSH PRIVILEGES;
+
+EOF
+
+
+HERE
+}
+

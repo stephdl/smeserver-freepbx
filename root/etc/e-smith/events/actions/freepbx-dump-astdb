@@ -1,0 +1,35 @@
+#!/usr/bin/env php
+<?php
+// No use outputting anything, as env forces php headers to appear. Sigh.
+
+function getconf($filename) {
+        $file = file($filename);
+        foreach ($file as $line) {
+                if (preg_match("/^\s*([\w]+)\s*=\s*\"?([\w\/\:\.\%-]*)\"?\s*([;#].*)?/",$line,$matches)) {
+                        $conf[ $matches[1] ] = $matches[2];
+                }
+        }
+        return $conf;
+}
+
+$amp_conf = getconf("/etc/amportal.conf");
+
+require_once($amp_conf['AMPWEBROOT']."/admin/functions.inc.php");
+require_once($amp_conf['AMPWEBROOT']."/admin/common/php-asmanager.php");
+$astman         = new AGI_AsteriskManager();
+if (! $res = $astman->connect("127.0.0.1", $amp_conf["AMPMGRUSER"] , $amp_conf["AMPMGRPASS"])) {
+        unset( $astman );
+}
+
+@mkdir("/home/e-smith/db/freepbx/");
+$fh = fopen("/home/e-smith/db/freepbx/astdb.dump", "w");
+$astdb = $astman->database_show();
+foreach ($astdb as $key => $val) {
+        if ($key == "") { continue; }
+        if ($key == "Privilege") { continue; }
+        fwrite($fh, "[$key] [$val]\n");
+}
+fclose($fh);
+
+?>
+

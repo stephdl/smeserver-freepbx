@@ -1,0 +1,20 @@
+#/bin/bash
+
+# Remove crontab entry automatically added by FreePBX
+# as it generate an error (run as root before asterisk
+# which means asterisk won't be allowed to open the debug
+# file /tmp/freepbx_debug.log, and send a email to the admin
+
+crontab -l > /tmp/freepbx_old_crontab
+awk '$0!~/freepbx-cron-scheduler.php/ { print $0 }' /tmp/freepbx_old_crontab > /tmp/freepbx_new_crontab
+crontab /tmp/freepbx_new_crontab
+rm -f /tmp/freepbx_old_crontab
+rm -f /tmp/freepbx_new_crontab
+
+# Now change permissions on /tmp/freepbx_debug.log to be sure
+# asterisk user has write permission
+if [ -e /tmp/freepbx_debug.log ]; then
+    chown asterisk:asterisk /tmp/freepbx_debug.log
+    chmod 700 /tmp/freepbx_debug.log
+fi
+

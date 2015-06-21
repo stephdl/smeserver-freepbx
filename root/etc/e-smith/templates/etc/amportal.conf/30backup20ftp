@@ -1,0 +1,17 @@
+
+# The following are used to optionally have the freepbx backup program optionally
+# send the generated backup to an ftp server
+#
+# FTPBACKUP=YES to enable
+# FTPUSER, FTPPASSWORD, FTPSERVER must be set
+# FTPSUBDIR is an optional subdirectory at the ftp server, it will cause ftp to do a cd
+#
+# There is no error checking so you should check to make sure these are set correctly. The
+# ftp is saved after the backup, so it will not cause the local backup file to be effected
+#
+# FTPBACKUP=yes
+#FTPUSER=asterisk
+#FTPPASSWORD=password
+#FTPSUBDIR=mybackupfolder
+#FTPSERVER=myftpserver
+

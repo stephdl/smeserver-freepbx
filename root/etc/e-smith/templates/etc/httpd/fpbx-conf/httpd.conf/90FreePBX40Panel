@@ -1,0 +1,9 @@
+
+<Location /freepbx/panel/>
+        AuthType Basic
+        TKTAuthLoginURL /server-common/cgi-bin/login
+        require user admin {getUsersList('fop');}
+        SetEnv IMGHDR_SRC "/server-common/server-manager.jpg"
+        Satisfy all
+</Location>
+

@@ -1,0 +1,25 @@
+{
+my $freepbx = $DB->get('freepbx') ||  $DB->new_record('freepbx', {type => 'service'});
+
+my $dbpass = $freepbx->prop('DbPassword') || 
+	$freepbx->set_prop('DbPassword', `/usr/bin/openssl rand -base64 40 | /usr/bin/tr -c -d '[:graph:]'`);
+
+my $managerpass =  $freepbx->prop('ManagerPassword') ||
+        $freepbx->set_prop('ManagerPassword', `/usr/bin/openssl rand -base64 10 | /usr/bin/tr -c -d '[:alnum:]'`);
+
+my $aripass =  $freepbx->prop('AriPassword') ||
+        $freepbx->set_prop('AriPassword', `/usr/bin/openssl rand -base64 10 | /usr/bin/tr -c -d '[:alnum:]'`);
+
+my $fop = $DB->get('fop') ||  $DB->new_record('fop', {type => 'service'});
+
+my $foppass = $fop->prop('Password') || '';
+if ($foppass eq ''){
+    $fopass = $freepbx->prop('FopPassword') || '';
+    if ($foppass eq ''){
+        $foppass = `/usr/bin/openssl rand -base64 5 | /usr/bin/tr -c -d '[:alnum:]'`;
+    }
+}
+$fop->set_prop('Password', $foppass);
+
+}
+
