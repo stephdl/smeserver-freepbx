@@ -23,7 +23,7 @@ AMPBADNUMBER=true
 # if DYNAMICHINTS is set to true, Core will not statically generate hints. Instead it will make a call to the
 # AMPBIN php script, generate_hints.php, through an Asteirsk's #exec call. This requires Asterisk.conf to be
 # configured with "execincludes=yes" set in the [options] section.
-DYNAMICHINTS=false
+DYNAMICHINTS=true
 
 # XTNCONFLICTABORT, BADDESTABORT
 # setting either of these to true will result in retrieve_conf aborting during a reload if an extension
@@ -49,7 +49,7 @@ USEDEVSTATE={ ( -e '/usr/lib/asterisk/modules/func_devstate.so' ||
 # the failed file open calls to the URLs return and there are often 2-3 of these that occur. Setting this value
 # will force FreePBX to avoid the attempt to open the URL and go straight to the wget calls.
 #
-MODULEADMINWGET=false
+MODULEADMINWGET=true
 
 # AMPMPG123=true|false # DEFAULT VALUE true
 # When set to false, the old MoH behavior is adopted where MP3 files can be loaded and WAV files converted to MP3
