@@ -23,7 +23,7 @@ safe_symlink("../daemontools" , 'root/etc/rc.d/init.d/supervise/httpd-fpbx');
 safe_symlink("/var/service/httpd-fpbx" , 'root/service/httpd-fpbx');
 #added by stephdl
 safe_symlink("../daemontools" , 'root/etc/rc.d/init.d/httpd-fpbx');
-
+safe_symlink("/usr/share/asterisk/sounds/","root//var/lib/asterisk/sounds/en");
 # Panel links
 
 panel_link("freepbx", 'manager');
