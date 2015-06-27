@@ -43,6 +43,7 @@ templates2events("/etc/e-smith/sql/init/30freepbx_mysql_create_database", qw(fre
 
 event_link("freepbx-checkinstall", $event, "10");
 event_link("freepbx-clean-crontab", $event, "40");
+event_link("freepbx-amportal.conf", $event, "91");
 event_link("freepbx-dump-astdb", "pre-backup", "30");
 
 safe_symlink("restart", "root/etc/e-smith/events/$event/services2adjust/mysql.init");
