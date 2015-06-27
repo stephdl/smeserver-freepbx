@@ -26,16 +26,14 @@ Requires: mysql
 Requires: httpd
 Requires: php-pear
 Requires: /usr/sbin/asterisk
-#Requires: %{_libdir}/asterisk/modules/app_addon_sql_mysql.so
-#Requires: dahdi-tools
-#Requires: dahdi-linux
 Requires: sox
 Requires: mod_auth_tkt
 Requires: e-smith-base
 Requires: freepbx-src
 Requires: asterisk-extra-sounds-en-ulaw-current
-Requires: iksemel speex spandsp asterisk asterisk-mysql asterisk-sounds-core-en-ulaw php-posix asterisk-calendar asterisk-fax asterisk-jabber asterisk-ldap asterisk-snmp asterisk-voicemail
-#Buildarch: noarch
+Requires: iksemel speex spandsp asterisk asterisk-mysql asterisk-sounds-core-en-ulaw php-posix 
+Requires: asterisk-calendar asterisk-fax asterisk-jabber asterisk-ldap asterisk-snmp asterisk-voicemail
+Buildarch: noarch
 AutoReqProv: no
 
 
