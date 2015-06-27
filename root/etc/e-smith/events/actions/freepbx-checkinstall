@@ -42,20 +42,6 @@ if [ ! -d /opt/freepbx/admin ]; then
 	echo "" >> /root/freepbx_install.log
 	echo "Installing FreePBX..." >> /root/freepbx_install.log
 echo "a" | ./install_amp --webroot /opt/freepbx --dbname freepbxdb --debug >> /root/freepbx_install.log 2>&1
-
-# Change FreePBX database settings that should have come from /etc/amportal.conf, but with fpbx > 2.9 it writes on the fly to this file
-#therefore a template is not possible
-FPBX_SETTING_PATH="/var/lib/asterisk/bin/freepbx_setting"
-$FPBX_SETTING_PATH DISABLE_CSS_AUTOGEN 1
-$FPBX_SETTING_PATH CHECKREFERER 0
-$FPBX_SETTING_PATH AUTHTYPE none
-$FPBX_SETTING_PATH AMPEXTENSIONS deviceanduser
-$FPBX_SETTING_PATH AMPWEBROOT /opt/freepbx
-$FPBX_SETTING_PATH MODULEADMINWGET 1
-$FPBX_SETTING_PATH DYNAMICHINTS 1
-$FPBX_SETTING_PATH ARI_ADMIN_PASSWORD $(/sbin/e-smith/db configuration getprop freepbx AriPassword)
-$FPBX_SETTING_PATH AMPMGRPASS $(/sbin/e-smith/db configuration getprop freepbx ManagerPassword)
-
 	else
 		echo "error: /usr/share/freepbx/sources/freepbx/ dosen't exists"
 		exit 1

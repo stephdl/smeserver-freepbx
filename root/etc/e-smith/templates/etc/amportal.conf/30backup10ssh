@@ -1,0 +1,13 @@
+
+# SSH BACKUP INFO: must have a valid SSHRSAKEY file and server, only supported through
+# ssh. SUBDIR is optional and will be created if it does not exist.
+#
+# If SSHUSER is not set, it will default to the current user which is asterisk in any
+# standard configuration.
+#
+#SSHBACKUP=yes
+#SSHUSER=backups
+#SSHRSAKEY=/etc/asterisk/backup_rsa
+#SSHSUBDIR=mysubdir
+#SSHSERVER=mybackupserver.com
+

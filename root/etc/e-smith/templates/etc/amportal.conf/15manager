@@ -1,0 +1,13 @@
+{
+my $managerpass = ${'freepbx'}{'ManagerPassword'} || 'amp111';
+
+$OUT.=<<"HERE";
+
+# AMPMGRUSER: the user to access the Asterisk manager interface
+AMPMGRUSER=admin
+
+# AMPMGRPASS: the password for AMPMGRUSER
+AMPMGRPASS=$managerpass
+
+HERE
+}

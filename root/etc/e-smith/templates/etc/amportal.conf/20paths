@@ -1,0 +1,21 @@
+
+# AMPBIN: where command line scripts live
+AMPBIN=/var/lib/asterisk/bin
+
+#AMPSBIN: where (root) command line scripts live
+AMPSBIN=/usr/local/sbin
+
+# AMPWEBROOT: the path to Apache's webroot (leave off trailing slash)
+AMPWEBROOT=/opt/freepbx
+
+# AMPCGIBIN: the path to Apache's cgi-bin dir (leave off trailing slash)
+AMPCGIBIN=/var/www/cgi-bin
+
+ASTETCDIR=/etc/asterisk
+ASTMODDIR=/usr/lib/asterisk/modules
+ASTVARLIBDIR=/var/lib/asterisk
+ASTAGIDIR=/var/lib/asterisk/agi-bin
+ASTSPOOLDIR=/var/spool/asterisk
+ASTRUNDIR=/var/run/asterisk
+ASTLOGDIR=/var/log/asterisk
+

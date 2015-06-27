@@ -199,7 +199,6 @@ rm -rf $RPM_BUILD_ROOT
 	--file /var/lib/asterisk/agi-bin/trunk_alert_mail.agi 'attr(0750,asterisk,asterisk)' \
 	--file /etc/logrotate.d/asterisk 'config(noreplace)' \
         --dir /var/lib/php/fpbx-session 'attr(0770,root,asterisk)' \
-        --file /etc/amportal.conf 'attr(0750,asterisk,asterisk)' \
 	 > %{name}-%{version}-%{release}-filelist
 
 %clean
