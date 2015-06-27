@@ -42,7 +42,6 @@ templates2events("/etc/httpd/fpbx-conf/httpd.conf", qw(freepbx-update bootstrap-
 templates2events("/etc/e-smith/sql/init/30freepbx_mysql_create_database", qw(freepbx-update bootstrap-console-save));
 
 event_link("freepbx-checkinstall", $event, "10");
-event_link("freepbx-applypatch", $event, "20");
 event_link("freepbx-clean-crontab", $event, "40");
 event_link("freepbx-dump-astdb", "pre-backup", "30");
 
