@@ -4,7 +4,7 @@
 
 #%define fpbxversion 2.5.0
 %define version	0.1
-%define release 34
+%define release 35
 %define name smeserver-freepbx
 
 Summary: Asterisk web GUI
@@ -43,7 +43,7 @@ This package provide the integration of FreePBX on SME Server.
 
 
 %changelogi
-* Sun Jun 21 2015 stephane de labrusse <stephdl@de-labrusse.fr> 0.1-34.sme
+* Sun Jun 21 2015 stephane de labrusse <stephdl@de-labrusse.fr> 0.1-35.sme
 - first release to sme9
 - script and credits to Hsing-Foo Wang hsingfoo@gmail.com
 
